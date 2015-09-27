@@ -6,6 +6,8 @@ using System.IO;
 using System.Text.RegularExpressions; // for Regex
 
 /*
+ * v0.2 2015/09/27
+ *   - can handle multiline text
  * v0.1 2015/09/27
  *   - can replace nth tab to newline
  */
@@ -27,20 +29,32 @@ public class ButtonScript : MonoBehaviour {
 		string intext = System.IO.File.ReadAllText ("indata.txt");
 
 		string outtext = "";
-		int count = 0;
-		foreach (var element in intext.Split('\t')) {
-			if (count >= nth) {
-				count = 0;
-				if (outtext.Length > 0) {
-					outtext = outtext + System.Environment.NewLine;
-				}
-			} else {
-				if (outtext.Length > 0) {
-					outtext = outtext + '\t';
-				}
+		int count;
+		bool newline = false;
+		foreach (var linetext in intext.Split('\n')) {
+			count = 0;
+			if (outtext.Length > 0) {
+				outtext = outtext + '\n';
+				newline = true;
 			}
-			outtext = outtext + element;
-			count++;
+			foreach (var element in linetext.Split('\t')) {
+				if (newline) {
+					newline = false;
+				} else {
+					if (count >= nth) {
+						count = 0;
+						if (outtext.Length > 0) {
+							outtext = outtext + System.Environment.NewLine;
+						}
+					} else {
+						if (outtext.Length > 0) {
+							outtext = outtext + '\t';
+						}
+					}
+				}
+				outtext = outtext + element;
+				count++;
+			}
 		}
 
 		T_status.text = "output to " + outfile;
